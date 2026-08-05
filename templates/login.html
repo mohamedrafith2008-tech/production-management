@@ -1,47 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MPMS Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <title>Login - MPMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h2>Manufacturing Production Management System</h2>
-            <p>Secure System Login</p>
+  <div class="auth-wrapper">
+    <div class="card">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <h2>MPMS System</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Manufacturing Production Management</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form action="{{ url_for('login') }}" method="POST">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required>
         </div>
-        
-        <form id="loginForm" action="/" method="POST" onsubmit="return validateForm()">
-            <div class="form-group">
-                <label for="role">Select Role:</label>
-                <select id="role" name="role" required>
-                    <option value="" disabled selected>-- Select your role --</option>
-                    <option value="Administrator">Administrator</option>
-                    <option value="Production Manager">Production Manager</option>
-                    <option value="Shift Supervisor">Shift Supervisor</option>
-                    <option value="Quality Inspector">Quality Inspector</option>
-                    <option value="Store/Inventory Keeper">Store / Inventory Keeper</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="username">Username / User ID:</label>
-                <input type="text" id="username" name="username" placeholder="Enter your User ID" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" placeholder="Enter your Password" required>
-            </div>
-
-            <div id="error-message" class="error-message"></div>
-
-            <button type="submit" class="login-btn">Log In</button>
-        </form>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Login to Plant Operations</button>
+      </form>
     </div>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </div>
 </body>
 </html>

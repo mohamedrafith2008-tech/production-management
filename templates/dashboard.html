@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - MPMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">MPMS Factory Suite</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('schedules') }}">Schedules</a></li>
+      <li><a href="{{ url_for('machines') }}">Machines</a></li>
+      <li><a href="{{ url_for('inspections') }}">Quality</a></li>
+      <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+      <li><a href="{{ url_for('logout') }}" class="btn-logout">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Schedules</h3>
+        <div class="value">{{ stats.total_schedules }}</div>
+      </div>
+      <div class="stat-card" style="border-top-color: var(--accent-color);">
+        <h3>Active Production</h3>
+        <div class="value">{{ stats.active_schedules }}</div>
+      </div>
+      <div class="stat-card" style="border-top-color: var(--success);">
+        <h3>Machines Running</h3>
+        <div class="value">{{ stats.running_machines }} / {{ stats.total_machines }}</div>
+      </div>
+      <div class="stat-card" style="border-top-color: var(--warning);">
+        <h3>Low Stock Alerts</h3>
+        <div class="value" style="color: var(--warning);">{{ stats.low_stock_alerts }}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Recent Production Schedules</h2>
+        {% if session['role'] in ['admin', 'prod_manager'] %}
+          <a href="{{ url_for('create_schedule') }}" class="btn btn-primary">+ New Schedule</a>
+        {% endif %}
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Schedule Code</th>
+            <th>Product Name</th>
+            <th>Target Qty</th>
+            <th>Assigned Machine</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in schedules %}
+          <tr>
+            <td><strong>{{ s['schedule_code'] }}</strong></td>
+            <td>{{ s['product_name'] }}</td>
+            <td>{{ s['target_quantity'] }} units</td>
+            <td>{{ s['machine_name'] or 'Unassigned' }}</td>
+            <td><span class="badge badge-{{ s['status']|lower|replace(' ', '-') }}">{{ s['status'] }}</span></td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--text-muted);">No schedules recorded yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

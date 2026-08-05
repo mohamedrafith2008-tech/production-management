@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quality Inspections - MPMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">MPMS Factory Suite</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('schedules') }}">Schedules</a></li>
+      <li><a href="{{ url_for('machines') }}">Machines</a></li>
+      <li><a href="{{ url_for('inspections') }}">Quality</a></li>
+      <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+      <li><a href="{{ url_for('logout') }}" class="btn-logout">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Quality Inspection Logs</h2>
+        {% if session['role'] in ['admin', 'quality_inspector'] %}
+          <a href="{{ url_for('create_inspection') }}" class="btn btn-primary">+ Log Inspection</a>
+        {% endif %}
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Schedule Code</th>
+            <th>Product Name</th>
+            <th>Result</th>
+            <th>Defect Type</th>
+            <th>Inspector</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in inspections %}
+          <tr>
+            <td><strong>{{ i['schedule_code'] }}</strong></td>
+            <td>{{ i['product_name'] }}</td>
+            <td><span class="badge badge-{{ i['result']|lower }}">{{ i['result'] }}</span></td>
+            <td>{{ i['defect_type'] }}</td>
+            <td>{{ i['inspector_name'] }}</td>
+            <td>{{ i['inspected_at'] }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted);">No inspection logs created yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

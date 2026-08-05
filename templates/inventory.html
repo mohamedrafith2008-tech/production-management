@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Raw Material Inventory - MPMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">MPMS Factory Suite</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('schedules') }}">Schedules</a></li>
+      <li><a href="{{ url_for('machines') }}">Machines</a></li>
+      <li><a href="{{ url_for('inspections') }}">Quality</a></li>
+      <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+      <li><a href="{{ url_for('logout') }}" class="btn-logout">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Raw Material Stock & Alerts</h2>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Material Name</th>
+            <th>In Stock</th>
+            <th>Reorder Threshold</th>
+            <th>Status Alert</th>
+            <th>Stock Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in materials %}
+          <tr>
+            <td><strong>{{ m['sku'] }}</strong></td>
+            <td>{{ m['material_name'] }}</td>
+            <td>{{ m['quantity'] }} {{ m['unit'] }}</td>
+            <td>{{ m['reorder_level'] }} {{ m['unit'] }}</td>
+            <td>
+              {% if m['quantity'] <= m['reorder_level'] %}
+                <span class="badge badge-fail">LOW STOCK</span>
+              {% else %}
+                <span class="badge badge-pass">SUFFICIENT</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if session['role'] in ['admin', 'store_keeper'] %}
+              <form action="{{ url_for('update_inventory', material_id=m['id']) }}" method="POST" style="display:flex; gap:0.3rem;">
+                <input type="number" step="1" name="quantity_change" placeholder="+/- Qty" required style="width:80px;">
+                <button type="submit" class="btn btn-secondary btn-sm">Update</button>
+              </form>
+              {% else %}
+              <span style="color:var(--text-muted); font-size:0.8rem;">Read Only</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

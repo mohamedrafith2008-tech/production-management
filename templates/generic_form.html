@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Entry Form - MPMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">MPMS Factory Suite</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('schedules') }}">Schedules</a></li>
+      <li><a href="{{ url_for('machines') }}">Machines</a></li>
+      <li><a href="{{ url_for('inspections') }}">Quality</a></li>
+      <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+      <li><a href="{{ url_for('logout') }}" class="btn-logout">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="container" style="max-width: 550px;">
+    <div class="card">
+      {% if form_type == 'create_schedule' %}
+        <h2>Create Production Schedule</h2>
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--border-color);">
+        <form action="{{ url_for('create_schedule') }}" method="POST">
+          <div class="form-group">
+            <label for="product_name">Product Name</label>
+            <input type="text" id="product_name" name="product_name" required>
+          </div>
+          <div class="form-group">
+            <label for="target_quantity">Target Batch Quantity</label>
+            <input type="number" id="target_quantity" name="target_quantity" required>
+          </div>
+          <div class="form-group">
+            <label for="machine_id">Assign Machine Line</label>
+            <select id="machine_id" name="machine_id">
+              <option value="">-- Unassigned --</option>
+              {% for m in machines %}
+                <option value="{{ m['id'] }}">{{ m['name'] }} ({{ m['machine_code'] }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Create Schedule Order</button>
+        </form>
+
+      {% elif form_type == 'create_inspection' %}
+        <h2>Log Quality Inspection</h2>
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--border-color);">
+        <form action="{{ url_for('create_inspection') }}" method="POST">
+          <div class="form-group">
+            <label for="schedule_id">Production Schedule Order</label>
+            <select id="schedule_id" name="schedule_id" required>
+              {% for s in schedules %}
+                <option value="{{ s['id'] }}">{{ s['schedule_code'] }} - {{ s['product_name'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="result">Inspection Result</label>
+            <select id="result" name="result" required>
+              <option value="Pass">Pass</option>
+              <option value="Fail">Fail</option>
+              <option value="Rework">Rework</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="defect_type">Defect Type (if any)</label>
+            <input type="text" id="defect_type" name="defect_type" placeholder="e.g. Surface Scratch, Dimension Error">
+          </div>
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Record Inspection Result</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

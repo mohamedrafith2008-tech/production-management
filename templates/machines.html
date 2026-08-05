@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Machine Monitoring - MPMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">MPMS Factory Suite</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('schedules') }}">Schedules</a></li>
+      <li><a href="{{ url_for('machines') }}">Machines</a></li>
+      <li><a href="{{ url_for('inspections') }}">Quality</a></li>
+      <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+      <li><a href="{{ url_for('logout') }}" class="btn-logout">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Machine Utilization & Downtime Log</h2>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Machine Code</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Runtime (hrs)</th>
+            <th>Downtime (hrs)</th>
+            <th>Computed Utilization</th>
+            <th>Log Operations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in machines %}
+          {% set total = m['total_runtime_hrs'] + m['downtime_hrs'] %}
+          {% set util = (m['total_runtime_hrs'] / total * 100) if total > 0 else 0 %}
+          <tr>
+            <td><strong>{{ m['machine_code'] }}</strong></td>
+            <td>{{ m['name'] }}</td>
+            <td><span class="badge badge-{{ m['status']|lower }}">{{ m['status'] }}</span></td>
+            <td>{{ m['total_runtime_hrs'] }} hrs</td>
+            <td>{{ m['downtime_hrs'] }} hrs</td>
+            <td><strong>{{ "%.1f"|format(util) }}%</strong></td>
+            <td>
+              {% if session['role'] in ['admin', 'shift_supervisor'] %}
+              <form action="{{ url_for('log_machine_runtime', machine_id=m['id']) }}" method="POST" style="display:flex; gap:0.3rem;">
+                <input type="number" step="0.5" name="runtime_hrs" placeholder="+Run" style="width:50px;">
+                <input type="number" step="0.5" name="downtime_hrs" placeholder="+Down" style="width:50px;">
+                <select name="status">
+                  <option value="Running" {{ 'selected' if m['status']=='Running' }}>Running</option>
+                  <option value="Idle" {{ 'selected' if m['status']=='Idle' }}>Idle</option>
+                  <option value="Downtime" {{ 'selected' if m['status']=='Downtime' }}>Downtime</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+              </form>
+              {% else %}
+              <span style="color:var(--text-muted); font-size:0.8rem;">Read Only</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
